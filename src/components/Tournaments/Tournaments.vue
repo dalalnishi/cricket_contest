@@ -11,7 +11,7 @@
         
         <v-card>
           <v-form class="px-3" ref="form">
-            <v-card-title>
+            <v-card-title  style="background-color: #1e88e5;">
               <span class="headline">{{ formTitle }}</span>
             </v-card-title>
             <v-card-text>
@@ -195,7 +195,7 @@ export default {
     showPreview: false,
     imagePreview: "",
     file: "",
-    inputRules: [v => v.length >= 3 || "Please Provide valid Input..!"],
+    inputRules: [v => !!v || 'This Field is required'],
     deletedId: -1,
     deleteTournamentName: '',
 
@@ -223,7 +223,6 @@ export default {
       return this.$store.state.TournamentStore.tournaments;
     },
     allTeams() {
-      //console.log(this.$store.state.TeamStore.allTeams);
       return this.$store.state.TeamStore.allTeams;
     }
   },

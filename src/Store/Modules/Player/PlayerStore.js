@@ -8,15 +8,35 @@ const state = {
 const actions = {
     getAllPlayers({commit}, { offset, limit, column, direction }) {
         axios
-            .get('api/player/' + offset + '/' + limit + '/' + column + '/' + direction )
+            .get('api/player/'+ offset + '/' + limit + '/' + column + '/' + direction )
             .then(response => {
-                //console.log(response.data)
                 commit('setPlayersLength', response.data.length);
                 commit('setPlayers', response.data);
             })
             .catch(error => {
                 console.log(error.response.data.error)
             })
+    },
+    addPlayer({dispatch}, { formData, config, offset, limit, column, direction }) {
+        axios
+            .post('api/player/', formData, config)
+            .then(response => {
+                dispatch('getAllPlayers', { offset, limit, column, direction })
+            })
+            .catch(error => {
+                console.log(error.response.data.error);
+            })
+    },
+
+    deletePlayer({dispatch}, { index, offset, limit, column, direction }) {
+        axios
+            .delete('api/player/'+index)
+            .then(response => {
+                dispatch('getAllPlayers', { offset, limit, column, direction })
+            })
+            .catch(error => {
+                console.log(error.response.data.error)
+            });
     }
 }
 

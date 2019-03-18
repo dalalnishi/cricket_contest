@@ -10,7 +10,7 @@
         </template>
         <v-card>
         <v-form class="px-3" ref="form">
-          <v-card-title>
+          <v-card-title  style="background-color: #1e88e5;">
             <span class="headline">{{ formTitle }}</span>
           </v-card-title>
 
