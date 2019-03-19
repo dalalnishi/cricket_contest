@@ -9,26 +9,25 @@ const state = {
 const actions = {
     getTeams({commit}, { offset, limit, column, direction }) {
         axios
-        .get("api/team/"+ offset + '/' + limit + '/' + column + '/' + direction)
-        .then(response => {
-            commit('setTeamsLength', response.data.length);
-            commit('setTeams', response.data);
-        })
-        .catch(error => {
-          console.log(error.response.data.error);
-        });
+            .get("api/team/"+ offset + '/' + limit + '/' + column + '/' + direction)
+            .then(response => {
+                commit('setTeamsLength', response.data.length);
+                commit('setTeams', response.data);
+            })
+            .catch(error => {
+                console.log(error.response.data.error);
+            });
     },
 
     getAllTeams({ commit }) {
         axios
-        .get("api/team/")
-        .then(response => {
-            console.log('teams', response.data)
-            //commit('setAllTeams', response.data);
-        })
-        .catch(error => {
-          console.log(error.response.data.error);
-        });
+            .get("api/team/")
+            .then(response => {
+                commit('setAllTeams', response.data);
+            })
+            .catch(error => {
+                console.log(error.response.data.error);
+            });
     },
 
     addTeam({ dispatch }, { formData, config, offset, limit, column, direction }) {

@@ -1,19 +1,21 @@
+import axios from 'axios';
+
 const state = {
     tournamentTeam: []
 }
 
 const actions = {
-
-}
+    
+}   
 
 const getters = {
-    tournamentTeams: state => {
-        return state.tournamentTeam
-    }
+    
 }
 
 const mutations = {
-
+    setTournamentTeam( state, payload ) {
+        state.tournamentTeam = payload;
+    }
 }
 
 export default {

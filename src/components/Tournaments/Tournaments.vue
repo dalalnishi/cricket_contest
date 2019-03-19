@@ -81,8 +81,7 @@
         </td>
         <td>{{ props.item.tournamentName }}</td>
         <td>{{ props.item.tournamentDescription }}</td>
-        <td><v-btn color="primary" dark @click="openDialog2(props.item.id, props.item.tournamentName)">Teams</v-btn></td>
-
+        <td><v-btn color="primary" dark @click="openDialog2(props.item)">Teams</v-btn></td>
         <td class="justify-center">
           <v-icon small class="mr-2" @click="editItem(props.item)">edit</v-icon>
           <v-icon small @click="deleteItem(props.item.id, props.item.tournamentName)">delete</v-icon>
@@ -100,73 +99,88 @@
             </v-card>
           </v-dialog>
 
-        <!-- Teams Module Dialog -->
+        
+        
+        
+        <!-- Add Tournament Teams Module Dialog -->
         <v-dialog v-model="dialog2" max-width="500px">
           <v-card>
-            <v-card-title>
+            <v-card-title style="background-color: #1e88e5; color: white;">
               {{ tournament_title }}
             </v-card-title>
             <v-card-text>
-              <v-btn color="primary" dark @click="dialog3 = !dialog3">Add Team</v-btn>
+              <v-btn 
+                  @click="addTeams"
+                  dark
+                  color="primary" 
+              >
+              Add More Teams
+              </v-btn>
 
-                <div v-for="(tteam,id) in allTeams" :key="id">
-                    <!-- <v-checkbox
-                        :label="tteam"
-                        :value="tteam"
-                        @click="selectTeam"
-                        hide-details
-                    /> -->
-                </div>
-                <div v-if="showDel">
+              <h3><u>Teams in {{ tournament_title }}</u></h3>
+              <div 
+                  v-if="tournamentTeam.length <= 0"
+              >
+                No Teams found in this Tournament!!!
+              </div>
+
+              <div v-else v-for="(tteam,id) in teams" :key="id">
+                  <v-checkbox
+                      :label="tteam.teamName"
+                      :value="tteam.teamName"                        
+                      hide-details
+                  />                    
+              </div>
+
+                <!-- <div v-if="showDel">
                   <a class="btn btn-danger" href="#">
                     <i class="fa fa-trash-o fa-lg"></i> Delete
                   </a>
-                </div>
+                </div> -->
               
             </v-card-text>
             <v-card-actions>
-              <v-btn color="primary" flat @click="clearDialog2">Close</v-btn>
+              <v-btn color="blue" flat @click="clearDialog2">Close</v-btn>
             </v-card-actions>
           </v-card>
         </v-dialog>
         
+        <!-- Add More Tournament Teams -->
         <v-dialog v-model="dialog3" max-width="500px">
 
           <v-card>
             <v-card-title>
-              <span>Add Team</span>
-              <v-spacer></v-spacer>
-
-              <v-layout
-                align-left
-                wrap
-              >
-              <v-flex>
-              <v-select                 
-                  :items="allTeams"
-                  multiple
-                ></v-select>
-                </v-flex>
-              </v-layout>
-
+              <span class="headlineTeam">Add Team</span>
             </v-card-title>
+              
+              <v-flex xs12 style="margin-left: 20px;">
+                <div v-for="(team,id) in teamsToAdd" :key="id">
+                  <v-checkbox
+                      :label="team.teamName"
+                      :value="team.teamName"                        
+                      hide-details
+                  />                    
+                </div>
+              </v-flex>
+              
             <v-card-actions>
-              <v-btn color="primary" flat @click="dialog3=false">Close</v-btn>
+              <v-btn color="blue" flat @click="dialog3=false">Close</v-btn>
+              <v-btn color="blue" flat @click="dialog3=false">Add</v-btn>
             </v-card-actions>
           </v-card>
         </v-dialog>
        
         </td>
       </template>
-      <template v-slot:no-data>
+      <!-- <template v-slot:no-data>
         <v-btn color="primary" @click="fetchTournaments">Reset</v-btn>
-      </template>
+      </template> -->
     </v-data-table>
   </div>
 </template>
 
 <script>
-import axios from "axios";
+import _ from 'lodash';
 
 export default {
   
@@ -199,12 +213,13 @@ export default {
     deletedId: -1,
     deleteTournamentName: '',
 
-    tournamentTeam: [],
-    deactiveTeam: [],
     dialog2: false,
     dialog3: false,
     showDel: false,
-    tournament_title: ''
+    totalTeams: [],
+    tournament_title: '',
+    teamsToAdd: [],
+    teams: []
   }),
 
   created() {
@@ -224,6 +239,9 @@ export default {
     },
     allTeams() {
       return this.$store.state.TeamStore.allTeams;
+    },
+    tournamentTeam() {
+      return this.$store.state.TournamentTeamStore.tournamentTeam;
     }
   },
 
@@ -242,22 +260,18 @@ export default {
         this.$store.dispatch('getAllTournament', payload);
       },
       deep: true
+    },
+    tournamentTeam: {
+      handler(value) {
+        this.teams = this.tournamentTeam.length ? this.tournamentTeam.filter((team) => {
+          return !team.TournamentTeam.isDelete;
+        }) : [];
+      }
     }
   },
 
   methods: {
-    fetchTournaments() {
-      axios
-        .get("http://192.168.200.147:8087/api/tournament/0/100/id/desc")
-        .then(response => {
-          
-          this.tournaments = response.data;
-        })
-        .catch(error => {
-          console.log(error);
-        });
-    },
-
+    
     cancelImage() {
       this.imagePreview = "";
       this.addTournament.tbanner = "defaultTournament.png";
@@ -399,45 +413,28 @@ export default {
       this.showPreview = false;
     },
 
-    openDialog2(tournament_id,t_name) {
+    openDialog2(data) {
 
       this.dialog2 = true;
-      this.tournament_title = t_name;
-      console.log('all', this.allTeams);
-      // axios
-      //   .get("http://192.168.200.147:8087/api/tournament/0/100/id/desc")
-      //   .then(response => {
-
-      //     for(var i=0; i<response.data.length; i++) {
-      //       if(response.data[i].id === tournament_id) {
-                    
-      //           for(var j=0; j<response.data[i].Teams.length; j++){
-      //             if(response.data[i].Teams.length > 0) {
-      //               if(response.data[i].Teams[j].TournamentTeam.isDelete === 0) {
-      //                 this.tournamentTeam.push(response.data[i].Teams[j].teamName);
-      //               }
-      //               else if(response.data[i].Teams[j].TournamentTeam.isDelete === 1){
-      //                 this.deactiveTeam.push(response.data[i].Teams[j].teamName);
-      //               }                    
-      //             }
-      //           }
-      //       }
-      //     }
-          
-      //   })
-      //   .catch(error => {
-      //     console.log(error);
-      //   });
+      this.tournament_title = data.tournamentName;
+      this.$store.commit('setTournamentTeam', data.Teams);
+      this.$store.dispatch('getAllTeams');
     },
 
     clearDialog2() {
       this.dialog2 = false;
-      this.tournamentTeam = [];
       this.showDel = false;
     },
 
     selectTeam() {
       this.showDel = true;
+    },
+
+    addTeams() {
+      this.dialog3 = !this.dialog3;
+      this.$store.dispatch('getAllTeams');
+      this.teamsToAdd = _.differenceBy(this.allTeams, this.teams, 'id' );
+      console.log(this.teamsToAdd);
     }
   }
 };
@@ -457,4 +454,15 @@ export default {
 {
   display: none;
 } */
+
+h3 {
+  color: cornflowerblue;
+  font-variant: small-caps;
+  font-weight: 600;
+}
+
+.headlineTeam {
+  color: cornflowerblue;
+  font-size: x-large;
+}
 </style>

@@ -65,11 +65,11 @@
                 </v-flex>
                 <v-flex xs12 md12>
                   <v-radio-group
-                      label="Gender"
-                      v-model="addPlayer.gender" 
+                      label="Gender"    
+                      v-model="addPlayer.gender"                   
                       row>
-                    <v-radio color="#4caf50" label="Male" value="1"></v-radio>
-                    <v-radio color="#4caf50" label="Female" value="2"></v-radio>
+                    <v-radio color="#4caf50" label="Male" value="1" ></v-radio>
+                    <v-radio color="#4caf50" label="Female" value="2" ></v-radio>
                   </v-radio-group>
                 </v-flex>
                 <v-flex xs12>
@@ -287,9 +287,24 @@
       },
 
       editItem (item) {
-        this.editedIndex = this.desserts.indexOf(item)
-        this.editedItem = Object.assign({}, item)
-        this.dialog = true
+        this.editedIndex = item.id;
+
+        this.addPlayer.firstName = item.firstName;
+        this.addPlayer.lastName = item.lastName;
+        this.addPlayer.dob = item.dob;
+        this.addPlayer.gender = item.gender.toString();
+        this.addPlayer.description = item.description;
+
+        if(item.playerImage !== 'defaultPlayerImage.png' ) {
+          this.imagePreview = 'http://192.168.200.147:8087/images/thumbnail/'+item.playerImage;
+          this.addPlayer.playerImage = item.playerImage;
+          this.showPreview = true;
+        }
+        else {
+          this.showPreview = false;
+          this.addPlayer.playerImage = 'defaultPlayerImage.png';
+        }   
+        this.dialog = true;
       },
 
       deleteItem (index, pname) {
@@ -313,14 +328,46 @@
       },
 
       close () {
-        this.dialog = false
+        this.dialog = false;
         this.imagePreview = '';
         this.showPreview = false;
+        this.$refs.form.reset();
+        this.addPlayer.gender = '1';
+        this.editedIndex = -1;
       },
 
       save () {
         if (this.editedIndex > -1) {
-          Object.assign(this.desserts[this.editedIndex], this.editedItem)
+          
+          if(this.$refs.form.validate()) {
+            const formData = new FormData();
+            formData.append('firstName', this.addPlayer.firstName);
+            formData.append('lastName', this.addPlayer.lastName);
+            formData.append('dob', this.addPlayer.dob);
+            formData.append('gender', this.addPlayer.gender);
+            formData.append('description', this.addPlayer.description);
+            formData.append('playerImage', this.addPlayer.playerImage);
+
+            const config = {
+              headers: {
+                'content-type': 'multipart/form-data'
+              }
+            };
+            
+            let editId = this.editedIndex;
+            
+            this.$store.dispatch('editPlayer', {
+              editId,
+              formData,
+              config,
+              offset: (this.pagination.page - 1) * this.pagination.rowsPerPage,
+              limit: this.pagination.rowsPerPage,
+              column: this.pagination.sortBy ? this.pagination.sortBy : 'id',
+              direction: this.pagination.descending ? 'desc' : 'asc'
+            });
+            this.$refs.form.reset();
+            this.close();
+          }
         } 
         else {
           

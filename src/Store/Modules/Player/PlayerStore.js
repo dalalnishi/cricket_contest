@@ -37,6 +37,18 @@ const actions = {
             .catch(error => {
                 console.log(error.response.data.error)
             });
+    },
+
+    editPlayer({dispatch}, { editId, formData, config, offset, limit, column, direction }) {
+        
+        axios
+            .put('api/player/'+editId, formData, config)
+            .then(response => {
+              dispatch('getAllPlayers', { offset, limit, column, direction })
+            })
+            .catch(error => {
+              console.log(error.response.data.error);
+            });
     }
 }
 
