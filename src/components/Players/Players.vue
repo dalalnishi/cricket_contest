@@ -68,7 +68,7 @@
                       label="Gender"    
                       v-model="addPlayer.gender"                   
                       row>
-                    <v-radio color="#4caf50" label="Male" value="1" ></v-radio>
+                    <v-radio color="#4caf50" label="Male" value="1"></v-radio>
                     <v-radio color="#4caf50" label="Female" value="2" ></v-radio>
                   </v-radio-group>
                 </v-flex>
@@ -123,7 +123,7 @@
       class="elevation-1"
     >
       <template v-slot:items="props">
-        <td><img :src="'http://192.168.200.147:8087/images/thumbnail/'+props.item.playerImage" alt="" /></td>
+        <td><img :src="imagePath+props.item.playerImage" alt="" /></td>
         <td>{{ props.item.firstName + ' ' + props.item.lastName }}</td>
         <td>{{calcAge(props.item.dob)}}</td>
         <td>{{ props.item.gender ===1 ? 'Male' : 'Female' }}</td>
@@ -221,6 +221,9 @@
       },
       totalPlayers() {
         return +this.$store.state.PlayerStore.playerLength;
+      },
+      imagePath() {
+        return this.$store.state.AppStore.imagePath;
       }
     },
 
@@ -296,7 +299,7 @@
         this.addPlayer.description = item.description;
 
         if(item.playerImage !== 'defaultPlayerImage.png' ) {
-          this.imagePreview = 'http://192.168.200.147:8087/images/thumbnail/'+item.playerImage;
+          this.imagePreview = this.imagePath+item.playerImage;
           this.addPlayer.playerImage = item.playerImage;
           this.showPreview = true;
         }
@@ -328,12 +331,15 @@
       },
 
       close () {
-        this.dialog = false;
+        this.addPlayer.firstName = '';
+        this.addPlayer.lastName = '';
+        this.addPlayer.gender = '1';
+        this.addPlayer.dob = '';
+        this.addPlayer.description = '';
         this.imagePreview = '';
         this.showPreview = false;
-        this.$refs.form.reset();
-        this.addPlayer.gender = '1';
         this.editedIndex = -1;
+        this.dialog = false;
       },
 
       save () {

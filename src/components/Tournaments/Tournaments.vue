@@ -76,7 +76,7 @@
        
         <td>
           <img
-            v-bind:src="'http://192.168.200.147:8087/images/thumbnail/'+props.item.tournamentBanner"
+            v-bind:src="imagePath+props.item.tournamentBanner"
           >
         </td>
         <td>{{ props.item.tournamentName }}</td>
@@ -110,7 +110,7 @@
             </v-card-title>
             <v-card-text>
               <v-btn 
-                  @click="addTeams"
+                  @click="addTeamsDialog"
                   dark
                   color="primary" 
               >
@@ -119,24 +119,31 @@
 
               <h3><u>Teams in {{ tournament_title }}</u></h3>
               <div 
-                  v-if="tournamentTeam.length <= 0"
+                  v-if="teams.length <=0"
               >
                 No Teams found in this Tournament!!!
               </div>
 
-              <div v-else v-for="(tteam,id) in teams" :key="id">
-                  <v-checkbox
-                      :label="tteam.teamName"
-                      :value="tteam.teamName"                        
-                      hide-details
-                  />                    
+              <div v-else>
+
+                <input type='checkbox' @click='checkAll()' v-model='isCheckAll'> Check All
+                <hr>
+                
+                <div v-for="(tteam,id) in teams" :key="id" style="border">                
+                    <v-checkbox
+                        :label="tteam.teamName"
+                        :value="tteam.id"    
+                        v-model="selectedTeams"
+                        hide-details
+                    />                    
+                </div>
               </div>
 
-                <!-- <div v-if="showDel">
-                  <a class="btn btn-danger" href="#">
-                    <i class="fa fa-trash-o fa-lg"></i> Delete
-                  </a>
-                </div> -->
+              <div v-if="selectedTeams && selectedTeams.length">
+                <a class="btn btn-danger" @click="deleteTournamentTeam" style="color:white; margin-top: 15px;">
+                  <i class="fa fa-trash-o fa-lg"></i> Delete
+                </a>
+              </div>
               
             </v-card-text>
             <v-card-actions>
@@ -148,33 +155,35 @@
         <!-- Add More Tournament Teams -->
         <v-dialog v-model="dialog3" max-width="500px">
 
-          <v-card>
+          <v-card height="450">
             <v-card-title>
               <span class="headlineTeam">Add Team</span>
             </v-card-title>
-              
-              <v-flex xs12 style="margin-left: 20px;">
-                <div v-for="(team,id) in teamsToAdd" :key="id">
-                  <v-checkbox
-                      :label="team.teamName"
-                      :value="team.teamName"                        
-                      hide-details
-                  />                    
-                </div>
-              </v-flex>
-              
-            <v-card-actions>
-              <v-btn color="blue" flat @click="dialog3=false">Close</v-btn>
-              <v-btn color="blue" flat @click="dialog3=false">Add</v-btn>
+
+            <v-card-text>
+              <v-select
+                v-model="newTeams"
+                :items="teamsToAdd"
+                item-text="teamName"
+                item-value="id"
+                attach
+                chips
+                deletable-chips
+                label="Select Teams"
+                multiple
+              ></v-select>              
+            </v-card-text>
+
+            <v-card-actions style="justify-content: flex-end">
+              <v-btn color="blue" flat @click="clearDialog3">Close</v-btn>
+              <v-btn color="blue" flat @click="addTournamentTeams">Add</v-btn>
             </v-card-actions>
           </v-card>
         </v-dialog>
        
         </td>
       </template>
-      <!-- <template v-slot:no-data>
-        <v-btn color="primary" @click="fetchTournaments">Reset</v-btn>
-      </template> -->
+      
     </v-data-table>
   </div>
 </template>
@@ -219,7 +228,12 @@ export default {
     totalTeams: [],
     tournament_title: '',
     teamsToAdd: [],
-    teams: []
+    teams: [],
+    selectedTeams: [],
+    isCheckAll: false,
+    selectedboxes: '',
+    newTeams: [],
+    tournament_id: '' 
   }),
 
   created() {
@@ -232,7 +246,7 @@ export default {
       return this.editedIndex === -1 ? "New Tournament" : "Edit Tournament";
     },
     totalTournaments() {
-      return +this.$store.state.TournamentStore.totalTournaments;
+      return this.$store.state.TournamentStore.totalTournaments;
     },
     tournaments() {
       return this.$store.state.TournamentStore.tournaments;
@@ -242,6 +256,9 @@ export default {
     },
     tournamentTeam() {
       return this.$store.state.TournamentTeamStore.tournamentTeam;
+    },
+    imagePath() {
+      return this.$store.state.AppStore.imagePath;
     }
   },
 
@@ -257,6 +274,7 @@ export default {
           column: this.pagination.sortBy ? this.pagination.sortBy : 'id',
           direction: this.pagination.descending ? 'desc' : 'asc'
         }
+        
         this.$store.dispatch('getAllTournament', payload);
       },
       deep: true
@@ -266,6 +284,16 @@ export default {
         this.teams = this.tournamentTeam.length ? this.tournamentTeam.filter((team) => {
           return !team.TournamentTeam.isDelete;
         }) : [];
+      }
+    },
+    selectedTeams: {
+      handler(value) {
+        if(this.selectedTeams.length === this.teams.length) {
+          this.isCheckAll = true;
+        }
+        else {
+          this.isCheckAll = false;
+        }
       }
     }
   },
@@ -310,7 +338,7 @@ export default {
 
       if(item.tournamentBanner !== 'defaultTournament.png') {
           this.addTournament.tbanner = item.tournamentBanner;
-          this.imagePreview ="http://192.168.200.147:8087/images/thumbnail/"+item.tournamentBanner;
+          this.imagePreview =this.imagePath+item.tournamentBanner;
           this.showPreview = true;
       }
       else {
@@ -416,6 +444,7 @@ export default {
     openDialog2(data) {
 
       this.dialog2 = true;
+      this.tournament_id = data.id;
       this.tournament_title = data.tournamentName;
       this.$store.commit('setTournamentTeam', data.Teams);
       this.$store.dispatch('getAllTeams');
@@ -423,20 +452,65 @@ export default {
 
     clearDialog2() {
       this.dialog2 = false;
-      this.showDel = false;
+      this.selectedTeams = [];
+      //this.showDel = false;
     },
 
-    selectTeam() {
-      this.showDel = true;
-    },
-
-    addTeams() {
+    addTeamsDialog() {
       this.dialog3 = !this.dialog3;
-      this.$store.dispatch('getAllTeams');
       this.teamsToAdd = _.differenceBy(this.allTeams, this.teams, 'id' );
-      console.log(this.teamsToAdd);
+    },
+
+    checkAll() {
+
+      this.isCheckAll = !this.isCheckAll;
+      this.selectedTeams = [];
+
+      if(this.isCheckAll) {
+        for(var key in this.teams) {
+          this.selectedTeams.push(this.teams[key].id);
+        }
+      }
+    },
+
+    addTournamentTeams() {
+      let teamId = this.newTeams;
+      let tournamentId = this.tournament_id;
+      
+      this.$store.dispatch('addTournamentTeam', {
+        tournamentId,
+        teamId,
+        offset: (this.pagination.page - 1) * this.pagination.rowsPerPage,
+        limit: this.pagination.rowsPerPage,
+        column: this.pagination.sortBy ? this.pagination.sortBy : 'id',
+        direction: this.pagination.descending ? 'desc' : 'asc'
+      });
+      this.dialog3 = false;
+    },
+
+    clearDialog3() {
+      this.dialog3 = false;    
+      this.newTeams = [];
+    },
+
+    deleteTournamentTeam() {
+      let tournamentId = this.tournament_id;
+      let teamId = this.selectedTeams; 
+
+      this.$store.dispatch('deleteTournamentTeam', {
+        tournamentId,
+        teamId,
+        offset: (this.pagination.page - 1) * this.pagination.rowsPerPage,
+        limit: this.pagination.rowsPerPage,
+        column: this.pagination.sortBy ? this.pagination.sortBy : 'id',
+        direction: this.pagination.descending ? 'desc' : 'asc'        
+      })
+
+      this.selectedTeams = [];
     }
+
   }
+
 };
 </script>
 
@@ -465,4 +539,9 @@ h3 {
   color: cornflowerblue;
   font-size: x-large;
 }
+
+.checkall-css{
+   color: #6c757d;
+}
+
 </style>

@@ -6,7 +6,7 @@
     <div class="sidebar-wrapper">
       <div class="logo">
         <a href="#" class="simple-text">
-            <div class="logo-img" style="height: 70px; width: 70px;">
+            <div class="logo-img" style="height: 70px; width: 70px;" @click="$router.push('/dashboard');">
                 <img class="logo-css" v-bind:src="imageLink" alt="" />
             </div>
           &nbsp;&nbsp;{{title}}

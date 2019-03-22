@@ -5,17 +5,21 @@ import NotFound from '../components/GeneralViews/NotFoundPage.vue'
 // Admin pages
 import Overview from 'src/components/Dashboard/Views/Overview.vue'
 //import UserProfile from 'src/components/Dashboard/Views/UserProfile.vue'
-import TableList from 'src/components/Dashboard/Views/TableList.vue'
-import Typography from 'src/components/Dashboard/Views/Typography.vue'
-import Icons from 'src/components/Dashboard/Views/Icons.vue'
-import Maps from 'src/components/Dashboard/Views/Maps.vue'
-import Notifications from 'src/components/Dashboard/Views/Notifications.vue'
+// import TableList from 'src/components/Dashboard/Views/TableList.vue'
+// import Typography from 'src/components/Dashboard/Views/Typography.vue'
+// import Icons from 'src/components/Dashboard/Views/Icons.vue'
+// import Maps from 'src/components/Dashboard/Views/Maps.vue'
+// import Notifications from 'src/components/Dashboard/Views/Notifications.vue'
 
 import Login from '../components/Login/Login.vue';
 import Registration from '../components/Registration/Registration.vue';
 import Tournaments from '../components/Tournaments/Tournaments.vue';
 import Teams from '../components/Teams/Teams.vue';
 import Players from '../components/Players/Players.vue';
+import TournamentTeamPlayers from '../components/TournamentTeamPlayers/TournamentTeamPlayers.vue';
+import TournamentMatches from '../components/TournamentMatches/TournamentMatches.vue';
+import TournamentPoints from '../components/TournamentPoints/TournamentPoints.vue';
+import PlayersScore from '../components/PlayersScore/PlayersScore.vue';
 
 const routes = [
   {
@@ -42,10 +46,6 @@ const routes = [
         component: Overview
       },
       {
-        path: '/players',
-        component: Players
-      },
-      {
         path: '/tournaments',
         component: Tournaments
       },
@@ -54,29 +54,24 @@ const routes = [
         component: Teams
       },
       {
-        path: 'table-list',
-        name: 'Table List',
-        component: TableList
+        path: '/players',
+        component: Players
       },
       {
-        path: 'typography',
-        name: 'Typography',
-        component: Typography
+        path: '/TournamentTeamPlayers',
+        component: TournamentTeamPlayers
       },
       {
-        path: 'icons',
-        name: 'Icons',
-        component: Icons
+        path: '/TournamentMatches',
+        component: TournamentMatches
       },
       {
-        path: 'maps',
-        name: 'Maps',
-        component: Maps
+        path: '/TournamentPoints',
+        component: TournamentPoints
       },
       {
-        path: 'notifications',
-        name: 'Notifications',
-        component: Notifications
+        path: '/PlayerScores',
+        component: PlayersScore
       }
     ]
   },

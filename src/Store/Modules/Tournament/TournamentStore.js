@@ -2,7 +2,7 @@ import axios from 'axios';
 
 const state = {
     tournaments: [],
-    totalTournaments: '0'
+    totalTournaments: 0
 }
 
 const actions = {
@@ -10,6 +10,7 @@ const actions = {
         return axios
             .get('api/tournament/'+ offset + '/' + limit + '/' + column + '/' + direction)
             .then(response=> {
+               
                 commit('setTournamentLength', response.data.length);
                 commit('setTournament', response.data);
         })
@@ -49,6 +50,17 @@ const actions = {
             .catch(error => {
                 console.log(error.response.data.error);
             });
+    },
+
+    getTournamentById({commit}, tournamentId) {
+        axios
+            .get('api/tournament/'+ tournamentId)
+            .then(response => {
+                commit('setTournamentTeam', response.data.Teams);
+            })
+            .catch(error => {
+                console.log(error.response.data.error);
+            })
     }
 }
 

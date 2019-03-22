@@ -18,6 +18,22 @@
         <i class="material-icons" style="font-size:36px">rowing</i>
         <p>Players</p>
       </sidebar-link>
+      <sidebar-link to="/TournamentTeamPlayers">
+        <i class="material-icons" style="font-size:36px">rowing</i>
+        <p>Tournament Team Players</p>
+      </sidebar-link>
+      <sidebar-link to="/TournamentMatches">
+        <i class="material-icons" style="font-size:36px">rowing</i>
+        <p>Tournament Matches</p>
+      </sidebar-link>
+      <sidebar-link to="/TournamentPoints">
+        <i class="material-icons" style="font-size:36px">rowing</i>
+        <p>Tournament Points</p>
+      </sidebar-link>
+      <sidebar-link to="/PlayerScores">
+        <i class="material-icons" style="font-size:36px">rowing</i>
+        <p>Match Players Scores</p>
+      </sidebar-link>
       <!-- <sidebar-link to="/admin/table-list">
         <i class="nc-icon nc-notes"></i>
         <p>Table list</p>
@@ -85,3 +101,9 @@
   }
 
 </script>
+
+<style>
+  .sidebar .nav, body > .navbar-collapse .nav  {
+      width: max-content;
+    }
+</style>

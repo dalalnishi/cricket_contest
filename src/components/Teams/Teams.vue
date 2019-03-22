@@ -64,7 +64,7 @@
     >
       <template v-slot:items="props">
         <td>
-          <img :src="'http://192.168.200.147:8087/images/thumbnail/'+props.item.teamLogo">
+          <img :src="imagePath + props.item.teamLogo">
         </td>
         <td>{{ props.item.teamName }}</td>
         <td>
@@ -110,7 +110,6 @@ export default {
       { text: "Actions", value: "actions", sortable: false }
     ],
     pagination: {},
-    //teams: [],
     editedIndex: -1,
     addTeam: {
       teambanner: "",
@@ -133,6 +132,9 @@ export default {
     },
     teams() {
       return this.$store.state.TeamStore.teams;
+    },
+    imagePath() {
+      return this.$store.state.AppStore.imagePath;
     }
   },
 
@@ -207,7 +209,7 @@ export default {
 
       if( item.teamLogo !== 'defaultTeamLogo.png' ) {
         this.addTeam.teambanner = item.teamLogo;
-        this.imagePreview ="http://192.168.200.147:8087/images/thumbnail/"+item.teamLogo;
+        this.imagePreview =this.imagePath+item.teamLogo;
         this.showPreview = true;
       }
       else{

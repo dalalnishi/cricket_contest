@@ -6,9 +6,11 @@ import TournamentStore from './Modules/Tournament/TournamentStore.js'
 import TeamStore from './Modules/Team/TeamStore.js'
 import PlayerStore from './Modules/Player/PlayerStore.js'
 import TournamentTeamStore from './Modules/TournamentTeam/TournamentTeamStore.js'
+import TourTeamPlayer from './Modules/TournamentTeamPlayers/TourTeamPlayersStore.js'
+import AppStore from './app.js';
 
 Vue.use(Vuex);
 
 export const store = new Vuex.Store({
-    modules: { LoginStore, TournamentStore, TeamStore, PlayerStore, TournamentTeamStore }
+    modules: { LoginStore, TournamentStore, TeamStore, PlayerStore, TournamentTeamStore, TourTeamPlayer, AppStore }
 });
