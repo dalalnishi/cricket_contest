@@ -9,7 +9,7 @@
           <v-btn color="primary" dark class="mb-2" v-on="on">Add Team Players</v-btn>
         </template>
 
-        <v-card height="450px">
+        <v-card height="550px">
             <v-card-title style="background-color: #1e88e5;">
               <span class="headlineTeam">Add Team</span>
             </v-card-title>
@@ -23,28 +23,50 @@
                 @change="fetchTeam"
                 attach
                 chips
-                deletable-chips
                 label="Select Tournament"
                 solo
               ></v-select> 
+              <div v-if="tourId">
+                <v-select v-if="tournamentTeam.length"
+                  v-model="teamId" 
+                  :items="tournamentTeam"
+                  item-text="teamName"
+                  item-value="id"
+                  @change="fetchPlayers"
+                  attach
+                  chips
+                  label="Select Team"
+                  solo
+                ></v-select>    
+              <div v-else>
+                <v-select
+                  label="No Teams found in this Tournament!!!"
+                  attach
+                  disabled
+                ></v-select> 
+              </div> 
+              </div> 
 
-              <v-select v-if="tourteams.length"  
-                v-model="teamId" 
-                :items="tourteams"
-                item-text="teamName"
-                item-value="id"
-                @change="fetchTeam"
-                attach
-                chips
-                deletable-chips
-                label="Select Team"
-                solo
-              ></v-select>             
+              <div v-if="teamId">
+                
+                <v-select 
+                  v-model="playerIds" 
+                  :items="teamPlayersOption"
+                  item-text="firstName"
+                  item-value="id"
+                  attach
+                  chips
+                  deletable-chips
+                  label="Select Players"
+                  multiple
+                ></v-select>
+                
+              </div>
             </v-card-text>
           
             <v-card-actions style="justify-content: flex-end;">
-              <v-btn color="blue" flat @click="dialog=false">Close</v-btn>
-              <v-btn color="blue" flat @click="dialog=false">Add</v-btn>
+              <v-btn color="blue" flat @click="close">Close</v-btn>
+              <v-btn color="blue" flat @click="addPlayer">Add</v-btn>
             </v-card-actions>
         </v-card>    
       </v-dialog>
@@ -79,7 +101,6 @@
         pagination: {},
         selected: [],
         dialog: false,
-        items: ['Foo', 'Bar', 'Fizz', 'Buzz'],
         headers: [
           {
             text: 'Banner',
@@ -92,7 +113,10 @@
         ],
         tourId: '',
         teamId: '',
-        tourteams: []
+        playerIds: [],
+        playerOption: [],
+        selectedPlayer: [],
+        teamPlayersOption: []
       }
     },
     computed: {
@@ -121,19 +145,65 @@
       },
 
       tourTeamPlayers () {
-          return this.$store.state.TourTeamPlayer.tourTeamPlayers;
+        return this.$store.state.TourTeamPlayer.tourTeamPlayers;
+      },
+
+      tournamentTeam() {
+        return this.$store.state.TournamentTeamStore.tournamentTeam;
+      },
+
+      Tourplayers() {
+        return this.$store.state.TourTeamPlayer.allPlayers;
       }
+      
     },
     methods: {
-        fetchTeam() {
-            console.log(this.tourId);
-            //this.$store.dispatch('teamById', this.teamId);
+        fetchTeam() {  
+          console.log('tourID', this.tourId);
+          this.$store.dispatch('getTournamentById', this.tourId);          
+        },
+
+        fetchPlayers() {
+          console.log('teamID', this.teamId);
+          this.$store.dispatch('getAllTourPlayers', {
+            offset: 0,
+            limit: 100,
+            column: 'id',
+            direction: 'asc'
+          }).then((res) => {
             
-            this.tourteams = this.tourTeamPlayers.length ? this.tourTeamPlayers.filter((team) => {                
-                return team.id === this.tourId;
-            }) : []
+            this.playerOption = this.tourTeamPlayers.length ? this.tourTeamPlayers.filter((tplayer) => {
+              return tplayer.id === this.tourId;
+            }): [];
             
-            console.log(this.tourteams);
+            if(this.playerOption[0]) {
+              this.selectedPlayer = this.playerOption[0].Players.map(mplayer => {
+                  if(mplayer.TeamPlayer) {
+                    if(mplayer.TeamPlayer.isDelete === 0) {
+                        return mplayer.id;
+                    }
+                  }
+                  return "";
+              })
+            }
+
+            this.teamPlayersOption = this.Tourplayers.map((player) => {
+              console.log(this.Tourplayers);
+                if (!this.selectedPlayer.includes(parseInt(player.id, 10))) {
+                    return player;
+                }
+            })
+            
+          });
+        },
+
+        addPlayer() {
+          console.log(this.playerIds);
+        },
+
+        close() {
+            this.dialog=false; 
+            this.tourId = '';
         }
     }
   }
